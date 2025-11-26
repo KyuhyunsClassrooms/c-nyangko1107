@@ -2,41 +2,101 @@
 #include <stdlib.h>
 #include <time.h>
 
-// 기본값 ±5 범위 랜덤 생성 함수
-int rand_stat(int base) {
-    return base + (rand() % 11 - 5);
-}
+/*
+    포켓몬 배틀 게임
+    - 이상해씨 / 파이리 / 꼬부기 중 하나 선택
+    - 컴퓨터도 랜덤 선택
+    - 상성에 따라 승패 결정
+*/
+
+/* 함수 선언 */
+int generate_random();
+void start_game();
 
 int main() {
-    srand(time(NULL));
+    int play_again = 1;
 
-    // 기본 종족값 (HP, ATK, SPD)
-    int bulba_base[3] = {45, 49, 45};
-    int char_base[3]  = {39, 52, 65};
-    int squirt_base[3] = {44, 48, 43};
-int a;
-    // 실제 랜덤 능력치
-    int Bulbasaur[3];
-    int Charmander[3];
-    int Squirtle[3];
-    int* PokemonList[3] = { Bulbasaur, Charmander, Squirtle };
+    printf("============================\n");
+    printf("     포켓몬 배틀 게임 v1.0     \n");
+    printf("============================\n\n");
 
-    // 기본값에 랜덤 적용
-    for (int i = 0; i < 3; i++) {
-        Bulbasaur[i]  = rand_stat(bulba_base[i]);
-        Charmander[i] = rand_stat(char_base[i]);
-        Squirtle[i]   = rand_stat(squirt_base[i]);
+    while (play_again == 1) {
+        start_game();
+
+        printf("\n다시 하시겠습니까? (1: 예, 0: 아니오): ");
+        scanf("%d", &play_again);
+        while (getchar() != '\n');  // 입력 버퍼 비우기
+        printf("\n");
     }
-    int enemyIndex = rand() % 3;  // 0~2 중 하나
-	int* Enemy = PokemonList[enemyIndex];
-	printf("%d", PokemonList[enemyIndex]);
-    printf("포켓몬을 선택하세요(숫자를 쓰세요)\n1.이상해씨\n2.파이리\n3.꼬부기");
-    scanf("%d", a); 
 
-    // 출력
-    printf("이상해씨 : HP=%d ATK=%d SPD=%d\n", Bulbasaur[0], Bulbasaur[1], Bulbasaur[2]);
-    printf("파이리   : HP=%d ATK=%d SPD=%d\n", Charmander[0], Charmander[1], Charmander[2]);
-    printf("꼬부기   : HP=%d ATK=%d SPD=%d\n", Squirtle[0], Squirtle[1], Squirtle[2]);
-
+    printf("게임을 종료합니다. 감사합니다!\n");
     return 0;
+}
+
+/* 0~2 사이의 랜덤 숫자 생성 (포켓몬 선택용) */
+int generate_random() {
+    srand(time(NULL));  
+    return rand() % 3;  // 0~2
+}
+
+/* 포켓몬 이름 매핑 */
+const char* get_pokemon_name(int num) {
+    switch (num) {
+        case 0: return "이상해씨";  // 풀
+        case 1: return "파이리";    // 불
+        case 2: return "꼬부기";    // 물
+        default: return "???";
+    }
+}
+
+/* 승패 판정:  
+   0: 이상해씨(풀), 1: 파이리(불), 2: 꼬부기(물)
+   규칙:
+   - 풀 → 물 승
+   - 물 → 불 승
+   - 불 → 풀 승
+*/
+int check_result(int user, int com) {
+    if (user == com) return 0;  // 비김
+
+    if ((user == 0 && com == 2) ||
+        (user == 2 && com == 1) ||
+        (user == 1 && com == 0)) {
+        return 1;               // 사용자 승
+    }
+
+    return -1;                  // 사용자 패
+}
+
+/* 게임 시작 함수 */
+void start_game() {
+    int user, com, result;
+
+    printf("=== 포켓몬 배틀 시작! ===\n");
+    printf("포켓몬을 선택하세요!\n");
+    printf("0: 이상해씨 (풀)\n1: 파이리 (불)\n2: 꼬부기 (물)\n\n");
+
+    printf("당신의 선택: ");
+    scanf("%d", &user);
+    while (getchar() != '\n');  // 입력 버퍼 비우기
+
+    if (user < 0 || user > 2) {
+        printf("??  0~2 사이의 숫자를 입력하세요!\n");
+        return;
+    }
+
+    com = generate_random();
+
+    printf("\n당신의 포켓몬: %s\n", get_pokemon_name(user));
+    printf("상대 포켓몬: %s\n\n", get_pokemon_name(com));
+
+    result = check_result(user, com);
+
+    if (result == 0) {
+        printf("?? 비겼습니다!\n");
+    } else if (result == 1) {
+        printf("?? 당신의 승리입니다!\n");
+    } else {
+        printf("?? 패배했습니다...\n");
+    }
 }
